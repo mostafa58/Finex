@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finex Express | سیستم سریع ارسال و تسویه USDC</title>
+    <style>
+        :root {
+            --bg-color: #0d0f14;
+            --card-bg: #151821;
+            --card-border: #222736;
+            --graphite-slate: #1a1e2b;
+            --gold-primary: #f59e0b;
+            --gold-light: #fbbf24;
+            --gold-gradient: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+            --gold-glow: rgba(245, 158, 11, 0.25);
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --green-color: #10b981;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; position: relative; }
+        .container { width: 100%; max-width: 460px; margin-bottom: 60px; }
+        
+        .app-card { background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); position: relative; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .brand-box { display: flex; align-items: center; gap: 12px; }
+        
+        .brand-icon { 
+            width: 48px; height: 48px; background: #11131a; 
+            border: 1px solid rgba(245, 158, 11, 0.4); border-radius: 14px; 
+            display: flex; align-items: center; justify-content: center; 
+            box-shadow: 0 6px 20px var(--gold-glow); overflow: hidden;
+        }
+        .brand-icon img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .brand-title { font-size: 24px; font-weight: 900; color: #fff; letter-spacing: 0.5px; }
+        .brand-title span { color: var(--gold-primary); }
+
+        .btn-sm { background-color: var(--graphite-slate); color: #fff; border: 1px solid var(--card-border); padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-sm.connected { background-color: rgba(16, 185, 129, 0.15); border-color: var(--green-color); color: var(--green-color); }
+
+        .input-group { margin-bottom: 16px; }
+        .label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+
+        .amount-box { display: flex; align-items: center; background-color: var(--bg-color); border: 1px solid var(--card-border); border-radius: 14px; padding: 12px 16px; }
+        .currency { font-size: 24px; font-weight: bold; color: var(--gold-primary); margin-left: 10px; }
+        .amount-input { background: none; border: none; color: #fff; font-size: 24px; font-weight: bold; width: 100%; outline: none; }
+
+        .quick-btns { display: flex; gap: 8px; margin-top: 10px; }
+        .quick-btn { flex: 1; background-color: var(--bg-color); border: 1px solid var(--card-border); color: var(--text-color); padding: 10px; border-radius: 10px; font-weight: 600; cursor: pointer; }
+        .quick-btn.active { border-color: var(--gold-primary); background-color: rgba(245, 158, 11, 0.12); color: var(--gold-light); }
+
+        .summary-box { background-color: var(--bg-color); border: 1px solid var(--card-border); border-radius: 16px; padding: 16px; margin-bottom: 20px; font-size: 13px; }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 10px; color: var(--text-muted); }
+        .summary-row:last-child { margin-bottom: 0; }
+        .summary-val { color: #fff; font-weight: 600; }
+        .toman-row { border-top: 1px dashed var(--card-border); padding-top: 10px; margin-top: 10px; font-size: 14px; }
+        .toman-val { color: var(--gold-light); font-weight: 800; font-size: 17px; }
+
+        .submit-btn { width: 100%; background: var(--gold-gradient); color: #000; border: none; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 900; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 20px var(--gold-glow); }
+
+        .telegram-support-btn {
+            position: fixed; bottom: 20px; left: 20px;
+            background: #229ED9; color: #fff; padding: 12px 18px; border-radius: 30px;
+            display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: bold;
+            text-decoration: none; box-shadow: 0 10px 25px rgba(34, 158, 217, 0.4); z-index: 99;
+        }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-box {
+            background: #151821; border: 1px solid #222736; border-radius: 20px;
+            width: 90%; max-width: 420px; padding: 20px; color: #fff; max-height: 80vh; display: flex; flex-direction: column;
+        }
+        .modal-title { font-size: 16px; font-weight: bold; color: #f59e0b; margin-bottom: 12px; }
+        .modal-content { font-size: 12px; color: #9ca3af; overflow-y: auto; line-height: 1.7; margin-bottom: 15px; }
+        .terms-check { display: flex; align-items: center; gap: 8px; font-size: 12px; margin-bottom: 15px; cursor: pointer; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="app-card">
+            <div class="header">
+                <div class="brand-box">
+                    <div class="brand-icon">
+                        <img src="finex-logo.png" alt="Finex Logo">
+                    </div>
+                    <div class="brand-title">FIN<span>EX</span></div>
+                </div>
+                <button class="btn-sm" id="connectBtn" onclick="connectWallet()">🔗 اتصال ولت</button>
+            </div>
+
+            <div class="input-group">
+                <label class="label">مبلغ ارسالی (USD / USDC):</label>
+                <div class="amount-box">
+                    <span class="currency">$</span>
+                    <input type="number" id="amountInput" class="amount-input" value="500" oninput="calculateSettlement()">
+                </div>
+                
+                <div class="quick-btns">
+                    <button class="quick-btn" onclick="setAmount(250, this)">$250</button>
+                    <button class="quick-btn active" onclick="setAmount(500, this)">$500</button>
+                    <button class="quick-btn" onclick="setAmount(1000, this)">$1,000</button>
+                </div>
+            </div>
+
+            <div class="summary-box">
+                <div class="summary-row">
+                    <span>ورودی خرید شما:</span>
+                    <span class="summary-val" id="grossUsd">$500.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>خالص دریافتی شبکه (USDC):</span>
+                    <span class="summary-val" id="netUsdc">497.00 USDC</span>
+                </div>
+                <div class="summary-row">
+                    <span>کارمزد خدمات Finex (3%):</span>
+                    <span class="summary-val" id="feeUsdc">- 14.91 USDC</span>
+                </div>
+                <div class="summary-row toman-row">
+                    <span>🇮🇷 معادل تسویه ریالی:</span>
+                    <span class="toman-val" id="tomanTotal">0 تومان</span>
+                </div>
+            </div>
+
+            <button class="submit-btn" onclick="openTermsModal()">تأیید و دریافت کد تسویه در تلگرام</button>
+        </div>
+    </div>
+
+    <a href="https://t.me/FinexPay_Support" target="_blank" class="telegram-support-btn">
+        ✈️ پشتیبانی آنلاین
+    </a>
+
+    <div class="modal-overlay" id="termsModal">
+        <div class="modal-box">
+            <div class="modal-title">⚖️ قوانین و سلب مسئولیت Finex</div>
+            <div class="modal-content">
+                <p><strong>۱. آدرس و شبکه:</strong> مسئولیت صحت آدرس و شبکه انتقال تماماً بر عهده کاربر است.</p>
+                <p><strong>۲. اختلالات بلاک‌‌چین:</strong> تاخیر یا لغو تراکنش توسط شبکه بلاک‌چین خارج از مسئولیت پلتفرم است.</p>
+                <p><strong>۳. عدم برگشت‌پذیری:</strong> تراکنش‌های تاییدشده غیرقابل استرداد می‌باشند.</p>
+                <p><strong>۴. نوسانات نرخ:</strong> تسویه بر اساس نرخ قطعی لحظه دریافت ارز محاسبه خواهد شد.</p>
+            </div>
+            <label class="terms-check">
+                <input type="checkbox" id="acceptTerms">
+                <span>تمام قوانین و مفاد سلب مسئولیت را مطالعه کرده و می‌پذیرم.</span>
+            </label>
+            <button class="submit-btn" onclick="executeTransfer()">ارسال درخواست به تلگرام پشتیبانی</button>
+        </div>
+    </div>
+
+    <script>
+        let settings = { tomanRate: 100000, feePercent: 3.0, networkFee: 3.0 };
+        let isConnected = false;
+
+        function calculateSettlement() {
+            const amount = parseFloat(document.getElementById('amountInput').value) || 0;
+            const net = Math.max(0, amount - settings.networkFee);
+            const fee = net * (settings.feePercent / 100);
+            const finalUsdc = net - fee;
+            const toman = Math.floor(finalUsdc * settings.tomanRate);
+
+            document.getElementById('grossUsd').innerText = `$${amount.toLocaleString()}`;
+            document.getElementById('netUsdc').innerText = `${net.toFixed(2)} USDC`;
+            document.getElementById('feeUsdc').innerText = `- ${fee.toFixed(2)} USDC`;
+            document.getElementById('tomanTotal').innerText = `${toman.toLocaleString('fa-IR')} تومان`;
+        }
+
+        function setAmount(val, btn) {
+            document.getElementById('amountInput').value = val;
+            document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            calculateSettlement();
+        }
+
+        function connectWallet() {
+            isConnected = true;
+            const btn = document.getElementById('connectBtn');
+            btn.innerText = "🟢 ولت متصل شد";
+            btn.classList.add('connected');
+        }
+
+        function openTermsModal() {
+            document.getElementById('termsModal').style.display = 'flex';
+        }
+
+        function executeTransfer() {
+            const checkbox = document.getElementById('acceptTerms');
+            if (!checkbox.checked) { alert("لطفاً ابتدا چک‌باکس پذیرش قوانین را علامت بزنید."); return; }
+            
+            const amount = document.getElementById('amountInput').value;
+            const toman = document.getElementById('tomanTotal').innerText;
+            const ticketId = 'FNX-' + Math.floor(100000 + Math.random() * 900000);
+
+            const msg = encodeURIComponent(`سلام، درخواست تسویه جدید دارم:\n\n🎫 کد پیگیری: ${ticketId}\n💵 مبلغ: $${amount}\n🇮🇷 معادل تسویه: ${toman}\n\nلطفاً آدرس ولت جهت ارسال ارز و هماهنگی حساب بانکی را بفرمایید.`);
+            
+            window.location.href = `https://t.me/FinexPay_Support?text=${msg}`;
+        }
+
+        calculateSettlement();
+    </script>
+</body>
+</html>
